@@ -62,6 +62,66 @@ def flash_card_game(flash_cards):
     print(f"You answered {score} out of {total_questions} questions correctly!")
     print("You've gone through all the flash cards. Great job!")
 
+def edit_flashcard_set(flashcard_sets):
+    """Edit an existing flashcard set."""
+    set_name = input("Enter the name of the flashcard set you want to edit: ").strip()
+    if set_name in flashcard_sets:
+        flash_cards = flashcard_sets[set_name]
+        while True:
+            print(f"\nEditing Flashcard Set: {set_name}")
+            print("1. Add a new term")
+            print("2. Update an existing term")
+            print("3. Delete a term")
+            print("4. View all terms")
+            print("5. Return to the main menu")
+            choice = input("Enter your choice (1/2/3/4/5): ").strip()
+
+            if choice == "1":
+                # Add a new term
+                term = input("Enter the new term: ").strip()
+                if term in flash_cards:
+                    print(f"The term '{term}' already exists. Use the update option to modify it.")
+                else:
+                    definition = input(f"Enter the definition for '{term}': ").strip()
+                    flash_cards[term] = definition
+                    print(f"Added: {term} -> {definition}")
+
+            elif choice == "2":
+                # Update an existing term
+                term = input("Enter the term you want to update: ").strip()
+                if term in flash_cards:
+                    definition = input(f"Enter the new definition for '{term}': ").strip()
+                    flash_cards[term] = definition
+                    print(f"Updated: {term} -> {definition}")
+                else:
+                    print(f"The term '{term}' does not exist in the flashcard set.")
+
+            elif choice == "3":
+                # Delete a term
+                term = input("Enter the term you want to delete: ").strip()
+                if term in flash_cards:
+                    del flash_cards[term]
+                    print(f"Deleted the term '{term}' from the flashcard set.")
+                else:
+                    print(f"The term '{term}' does not exist in the flashcard set.")
+
+            elif choice == "4":
+                # View all terms
+                print(f"\nTerms in Flashcard Set: {set_name}")
+                for term, definition in flash_cards.items():
+                    print(f"- {term}: {definition}")
+                print()
+
+            elif choice == "5":
+                # Return to the main menu
+                print("Returning to the main menu...\n")
+                break
+
+            else:
+                print("Invalid choice. Please enter 1, 2, 3, 4, or 5.\n")
+    else:
+        print(f"No flashcard set named '{set_name}' found. Please try again.")
+
 def main_menu():
     """Main menu for the flashcard program."""
     # Default flashcard set
@@ -86,9 +146,10 @@ def main_menu():
         print("1. Create a new flashcard set")
         print("2. View available flashcard sets")
         print("3. Play with a flashcard set")
-        print("4. Delete a flashcard set")
-        print("5. Exit")
-        choice = input("Enter your choice (1/2/3/4/5): ").strip()
+        print("4. Edit a flashcard set")
+        print("5. Delete a flashcard set")
+        print("6. Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6): ").strip()
 
         if choice == "1":
             # Create a new flashcard set
@@ -115,6 +176,10 @@ def main_menu():
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
         elif choice == "4":
+            # Edit a flashcard set
+            edit_flashcard_set(flashcard_sets)
+
+        elif choice == "5":
             # Delete a flashcard set
             set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
             if set_name in flashcard_sets:
@@ -126,13 +191,13 @@ def main_menu():
             else:
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
-        elif choice == "5":
+        elif choice == "6":
             # Exit the program
             print("Thank you for using the Flash Card Program! Goodbye!")
             break
 
         else:
-            print("Invalid choice. Please enter 1, 2, 3, 4, or 5.\n")
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.\n")
 
 # Main program
 if __name__ == "__main__":
