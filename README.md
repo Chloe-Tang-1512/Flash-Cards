@@ -6,7 +6,10 @@ import difflib
 
 def create_flashcards():
     """Allow the user to manually create a flashcard set."""
-    flash_cards = {}
+    flash_cards = {
+        "terms": {},  # Store individual terms
+        "stats": {"correct": 0, "total": 0, "percentage": 0.0}  # Overall stats for the set
+    }
     print("Let's create your flashcard set!")
     print("Enter terms and their definitions. Type 'done' when you're finished.\n")
 
@@ -16,7 +19,7 @@ def create_flashcards():
             break
         definition = input(f"Enter the definition for '{term}': ").strip()
         # Initialize stats for the term
-        flash_cards[term] = {"definition": definition, "correct": 0, "total": 0}
+        flash_cards["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
         print(f"Added: {term} -> {definition}\n")
 
     print("Flashcard set created successfully!\n")
@@ -28,11 +31,8 @@ def flash_card_game(flash_cards):
     print("You will be shown a term, and you need to guess its definition.")
     print("Type 'exit' to quit the game.\n")
 
-    # Convert the dictionary into a list of terms
-    terms = list(flash_cards.keys())
-
-    # Shuffle the terms for randomness
-    random.shuffle(terms)
+    terms = list(flash_cards["terms"].keys())  # Get the terms from the set
+    random.shuffle(terms)  # Shuffle the terms for randomness
 
     # Initialize score
     score = 0
@@ -48,19 +48,25 @@ def flash_card_game(flash_cards):
             break  # Exit the game and return to the main menu
 
         # Check if the user's answer matches the correct definition
-        correct_answer = flash_cards[term]["definition"]
+        correct_answer = flash_cards["terms"][term]["definition"]
         similarity = difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio()
 
-        # Update stats
-        flash_cards[term]["total"] += 1  # Increment total attempts
+        # Update term stats
+        flash_cards["terms"][term]["total"] += 1  # Increment total attempts for the term
+        flash_cards["stats"]["total"] += 1  # Increment total attempts for the set
         if similarity > 0.7:  # 70% similarity
             print("Correct!\n")
             score += 1  # Increment score for a correct answer
-            flash_cards[term]["correct"] += 1  # Increment correct attempts
+            flash_cards["terms"][term]["correct"] += 1  # Increment correct attempts for the term
+            flash_cards["stats"]["correct"] += 1  # Increment correct attempts for the set
         elif similarity > 0.4:  # Between 40% and 70% similarity
             print(f"Almost correct! Here's a hint: {correct_answer[:len(correct_answer)//2]}...\n")
         else:
             print(f"Incorrect. The correct definition is: {correct_answer}\n")
+
+    # Update overall percentage for the set
+    if flash_cards["stats"]["total"] > 0:
+        flash_cards["stats"]["percentage"] = (flash_cards["stats"]["correct"] / flash_cards["stats"]["total"]) * 100
 
     # Display the final score
     print(f"You answered {score} out of {total_questions} questions correctly!")
@@ -83,19 +89,19 @@ def edit_flashcard_set(flashcard_sets):
             if choice == "1":
                 # Add a new term
                 term = input("Enter the new term: ").strip()
-                if term in flash_cards:
+                if term in flash_cards["terms"]:
                     print(f"The term '{term}' already exists. Use the update option to modify it.")
                 else:
                     definition = input(f"Enter the definition for '{term}': ").strip()
-                    flash_cards[term] = {"definition": definition, "correct": 0, "total": 0}
+                    flash_cards["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
                     print(f"Added: {term} -> {definition}")
 
             elif choice == "2":
                 # Update an existing term
                 term = input("Enter the term you want to update: ").strip()
-                if term in flash_cards:
+                if term in flash_cards["terms"]:
                     definition = input(f"Enter the new definition for '{term}': ").strip()
-                    flash_cards[term]["definition"] = definition
+                    flash_cards["terms"][term]["definition"] = definition
                     print(f"Updated: {term} -> {definition}")
                 else:
                     print(f"The term '{term}' does not exist in the flashcard set.")
@@ -103,8 +109,8 @@ def edit_flashcard_set(flashcard_sets):
             elif choice == "3":
                 # Delete a term
                 term = input("Enter the term you want to delete: ").strip()
-                if term in flash_cards:
-                    del flash_cards[term]
+                if term in flash_cards["terms"]:
+                    del flash_cards["terms"][term]
                     print(f"Deleted the term '{term}' from the flashcard set.")
                 else:
                     print(f"The term '{term}' does not exist in the flashcard set.")
@@ -112,7 +118,7 @@ def edit_flashcard_set(flashcard_sets):
             elif choice == "4":
                 # View all terms
                 print(f"\nTerms in Flashcard Set: {set_name}")
-                for term, data in flash_cards.items():
+                for term, data in flash_cards["terms"].items():
                     correct = data["correct"]
                     total = data["total"]
                     percentage = (correct / total * 100) if total > 0 else 0
@@ -133,20 +139,17 @@ def main_menu():
     """Main menu for the flashcard program."""
     # Default flashcard set
     default_flash_cards = {
-        "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
-        "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
-        "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
-        "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
-        "Dictionary": {"definition": "A data structure that stores key-value pairs.", "correct": 0, "total": 0},
-        "List": {"definition": "A collection of ordered items in Python.", "correct": 0, "total": 0},
-        "Tuple": {"definition": "An immutable collection of ordered items in Python.", "correct": 0, "total": 0},
-        "Class": {"definition": "A blueprint for creating objects in object-oriented programming.", "correct": 0, "total": 0},
-        "Module": {"definition": "A file containing Python code that can be imported and reused.", "correct": 0, "total": 0},
-        "Exception": {"definition": "An error that occurs during the execution of a program.", "correct": 0, "total": 0}
+        "terms": {
+            "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+            "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+            "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+            "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+        },
+        "stats": {"correct": 0, "total": 0, "percentage": 0.0}
     }
 
     # Dictionary to store multiple flashcard sets
-    flashcard_sets = {"Default": default_flash_cards}
+    flashcard_sets = {"Python (default)": default_flash_cards}  # Renamed default set
 
     while True:
         print("\nMain Menu:")
@@ -170,8 +173,11 @@ def main_menu():
         elif choice == "2":
             # View available flashcard sets
             print("\nAvailable Flashcard Sets:")
-            for set_name in flashcard_sets:
-                print(f"- {set_name}")
+            for set_name, flash_cards in flashcard_sets.items():
+                correct = flash_cards["stats"]["correct"]
+                total = flash_cards["stats"]["total"]
+                percentage = flash_cards["stats"]["percentage"]
+                print(f"- {set_name}: {correct}/{total} correct ({percentage:.2f}%)")
             print()
 
         elif choice == "3":
@@ -190,7 +196,7 @@ def main_menu():
             # Delete a flashcard set
             set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
             if set_name in flashcard_sets:
-                if set_name == "Default":
+                if set_name == "Python (default)":
                     print("The default flashcard set cannot be deleted.")
                 else:
                     del flashcard_sets[set_name]
