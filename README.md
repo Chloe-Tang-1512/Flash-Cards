@@ -1,7 +1,6 @@
 # Flash-Cards
 A flash card website
 
-This is the code:
 import random
 import difflib
 
@@ -79,31 +78,61 @@ def main_menu():
         "Exception": "An error that occurs during the execution of a program."
     }
 
-    flash_cards = default_flash_cards  # Start with the default flashcard set
+    # Dictionary to store multiple flashcard sets
+    flashcard_sets = {"Default": default_flash_cards}
 
     while True:
-        print("Main Menu:")
+        print("\nMain Menu:")
         print("1. Create a new flashcard set")
-        print("2. Play with the current flashcard set")
-        print("3. Reset to the default flashcard set")
-        print("4. Exit")
-        choice = input("Enter your choice (1/2/3/4): ").strip()
+        print("2. View available flashcard sets")
+        print("3. Play with a flashcard set")
+        print("4. Delete a flashcard set")
+        print("5. Exit")
+        choice = input("Enter your choice (1/2/3/4/5): ").strip()
 
         if choice == "1":
-            flash_cards = create_flashcards()
-        elif choice == "2":
-            if flash_cards:
-                flash_card_game(flash_cards)
+            # Create a new flashcard set
+            set_name = input("Enter a name for your new flashcard set: ").strip()
+            if set_name in flashcard_sets:
+                print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
             else:
-                print("No flashcard set available. Please create one first.\n")
+                flashcard_sets[set_name] = create_flashcards()
+                print(f"Flashcard set '{set_name}' created successfully!")
+
+        elif choice == "2":
+            # View available flashcard sets
+            print("\nAvailable Flashcard Sets:")
+            for set_name in flashcard_sets:
+                print(f"- {set_name}")
+            print()
+
         elif choice == "3":
-            flash_cards = default_flash_cards
-            print("Flashcard set has been reset to the default set.\n")
+            # Play with a flashcard set
+            set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
+            if set_name in flashcard_sets:
+                flash_card_game(flashcard_sets[set_name])
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
         elif choice == "4":
+            # Delete a flashcard set
+            set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
+            if set_name in flashcard_sets:
+                if set_name == "Default":
+                    print("The default flashcard set cannot be deleted.")
+                else:
+                    del flashcard_sets[set_name]
+                    print(f"Flashcard set '{set_name}' deleted successfully!")
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "5":
+            # Exit the program
             print("Thank you for using the Flash Card Program! Goodbye!")
             break
+
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.\n")
+            print("Invalid choice. Please enter 1, 2, 3, 4, or 5.\n")
 
 # Main program
 if __name__ == "__main__":
