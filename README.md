@@ -5,17 +5,18 @@ import random
 import difflib
 import json
 import os
+import gzip
 
 def load_user_data():
-    """Load user data from a JSON file."""
-    if os.path.exists("user_data.json"):
-        with open("user_data.json", "r") as file:
+    """Load user data from a compressed JSON file."""
+    if os.path.exists("user_data.json.gz"):
+        with gzip.open("user_data.json.gz", "rt", encoding="utf-8") as file:
             return json.load(file)
     return {}
 
 def save_user_data(user_data):
-    """Save user data to a JSON file."""
-    with open("user_data.json", "w") as file:
+    """Save user data to a compressed JSON file."""
+    with gzip.open("user_data.json.gz", "wt", encoding="utf-8") as file:
         json.dump(user_data, file, indent=4)
 
 def login():
