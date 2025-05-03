@@ -15,7 +15,8 @@ def create_flashcards():
         if term.lower() == "done":
             break
         definition = input(f"Enter the definition for '{term}': ").strip()
-        flash_cards[term] = definition
+        # Initialize stats for the term
+        flash_cards[term] = {"definition": definition, "correct": 0, "total": 0}
         print(f"Added: {term} -> {definition}\n")
 
     print("Flashcard set created successfully!\n")
@@ -47,12 +48,15 @@ def flash_card_game(flash_cards):
             break  # Exit the game and return to the main menu
 
         # Check if the user's answer matches the correct definition
-        correct_answer = flash_cards[term]
+        correct_answer = flash_cards[term]["definition"]
         similarity = difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio()
 
+        # Update stats
+        flash_cards[term]["total"] += 1  # Increment total attempts
         if similarity > 0.7:  # 70% similarity
             print("Correct!\n")
             score += 1  # Increment score for a correct answer
+            flash_cards[term]["correct"] += 1  # Increment correct attempts
         elif similarity > 0.4:  # Between 40% and 70% similarity
             print(f"Almost correct! Here's a hint: {correct_answer[:len(correct_answer)//2]}...\n")
         else:
@@ -83,7 +87,7 @@ def edit_flashcard_set(flashcard_sets):
                     print(f"The term '{term}' already exists. Use the update option to modify it.")
                 else:
                     definition = input(f"Enter the definition for '{term}': ").strip()
-                    flash_cards[term] = definition
+                    flash_cards[term] = {"definition": definition, "correct": 0, "total": 0}
                     print(f"Added: {term} -> {definition}")
 
             elif choice == "2":
@@ -91,7 +95,7 @@ def edit_flashcard_set(flashcard_sets):
                 term = input("Enter the term you want to update: ").strip()
                 if term in flash_cards:
                     definition = input(f"Enter the new definition for '{term}': ").strip()
-                    flash_cards[term] = definition
+                    flash_cards[term]["definition"] = definition
                     print(f"Updated: {term} -> {definition}")
                 else:
                     print(f"The term '{term}' does not exist in the flashcard set.")
@@ -108,8 +112,11 @@ def edit_flashcard_set(flashcard_sets):
             elif choice == "4":
                 # View all terms
                 print(f"\nTerms in Flashcard Set: {set_name}")
-                for term, definition in flash_cards.items():
-                    print(f"- {term}: {definition}")
+                for term, data in flash_cards.items():
+                    correct = data["correct"]
+                    total = data["total"]
+                    percentage = (correct / total * 100) if total > 0 else 0
+                    print(f"- {term}: {data['definition']} (Learned: {percentage:.2f}%)")
                 print()
 
             elif choice == "5":
@@ -126,16 +133,16 @@ def main_menu():
     """Main menu for the flashcard program."""
     # Default flashcard set
     default_flash_cards = {
-        "Python": "A high-level programming language.",
-        "Variable": "A storage location paired with an associated symbolic name.",
-        "Function": "A block of reusable code that performs a specific task.",
-        "Loop": "A programming construct that repeats a block of code.",
-        "Dictionary": "A data structure that stores key-value pairs.",
-        "List": "A collection of ordered items in Python.",
-        "Tuple": "An immutable collection of ordered items in Python.",
-        "Class": "A blueprint for creating objects in object-oriented programming.",
-        "Module": "A file containing Python code that can be imported and reused.",
-        "Exception": "An error that occurs during the execution of a program."
+        "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+        "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+        "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+        "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+        "Dictionary": {"definition": "A data structure that stores key-value pairs.", "correct": 0, "total": 0},
+        "List": {"definition": "A collection of ordered items in Python.", "correct": 0, "total": 0},
+        "Tuple": {"definition": "An immutable collection of ordered items in Python.", "correct": 0, "total": 0},
+        "Class": {"definition": "A blueprint for creating objects in object-oriented programming.", "correct": 0, "total": 0},
+        "Module": {"definition": "A file containing Python code that can be imported and reused.", "correct": 0, "total": 0},
+        "Exception": {"definition": "An error that occurs during the execution of a program.", "correct": 0, "total": 0}
     }
 
     # Dictionary to store multiple flashcard sets
