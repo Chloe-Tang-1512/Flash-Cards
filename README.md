@@ -6,6 +6,15 @@ import difflib
 import json
 import os
 import gzip
+import hashlib
+
+def hash_password(password):
+    """Hash a password using SHA-256."""
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+def verify_password(stored_password, provided_password):
+    """Verify a provided password against the stored hashed password."""
+    return stored_password == hash_password(provided_password)
 
 def load_user_data():
     """Load user data from a compressed JSON file."""
@@ -20,7 +29,7 @@ def save_user_data(user_data):
         json.dump(user_data, file, indent=4)
 
 def login():
-    """Prompt the user to log in or create a new account."""
+    """Prompt the user to log in or create a new account with a password."""
     user_data = load_user_data()
     print("Welcome to the Flash Card Program!")
     while True:
@@ -30,13 +39,23 @@ def login():
             if new_username in user_data:
                 print("This username already exists. Please try again.")
             else:
-                user_data[new_username] = {}  # Initialize an empty dictionary for the user's flashcard sets
+                password = input("Enter a password: ").strip()
+                hashed_password = hash_password(password)
+                user_data[new_username] = {
+                    "password": hashed_password,  # Store the hashed password
+                    "flashcard_sets": {}  # Initialize an empty dictionary for the user's flashcard sets
+                }
                 save_user_data(user_data)
                 print(f"Account created successfully! Welcome, {new_username}!")
                 return new_username, user_data
         elif username in user_data:
-            print(f"Welcome back, {username}!")
-            return username, user_data
+            password = input("Enter your password: ").strip()
+            stored_hashed_password = user_data[username]["password"]
+            if verify_password(stored_hashed_password, password):
+                print(f"Welcome back, {username}!")
+                return username, user_data
+            else:
+                print("Incorrect password. Please try again.")
         else:
             print("Username not found. Please try again or type 'new' to create an account.")
 
@@ -174,7 +193,7 @@ def edit_flashcard_set(flashcard_sets):
 def main_menu():
     """Main menu for the flashcard program."""
     username, user_data = login()  # Log in or create an account
-    flashcard_sets = user_data.get(username, {})  # Load the user's flashcard sets
+    flashcard_sets = user_data[username]["flashcard_sets"]  # Load the user's flashcard sets
 
     # Ensure the default set exists for the user
     if "Python (default)" not in flashcard_sets:
@@ -243,7 +262,7 @@ def main_menu():
 
         elif choice == "6":
             # Save progress and exit
-            user_data[username] = flashcard_sets  # Save the user's flashcard sets
+            user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
             save_user_data(user_data)
             print("Your progress has been saved. Goodbye!")
             break
