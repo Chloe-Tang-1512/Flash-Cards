@@ -3,6 +3,41 @@ A flash card website
 
 import random
 import difflib
+import json
+import os
+
+def load_user_data():
+    """Load user data from a JSON file."""
+    if os.path.exists("user_data.json"):
+        with open("user_data.json", "r") as file:
+            return json.load(file)
+    return {}
+
+def save_user_data(user_data):
+    """Save user data to a JSON file."""
+    with open("user_data.json", "w") as file:
+        json.dump(user_data, file, indent=4)
+
+def login():
+    """Prompt the user to log in or create a new account."""
+    user_data = load_user_data()
+    print("Welcome to the Flash Card Program!")
+    while True:
+        username = input("Enter your username (or type 'new' to create an account): ").strip()
+        if username.lower() == "new":
+            new_username = input("Enter a new username: ").strip()
+            if new_username in user_data:
+                print("This username already exists. Please try again.")
+            else:
+                user_data[new_username] = {}  # Initialize an empty dictionary for the user's flashcard sets
+                save_user_data(user_data)
+                print(f"Account created successfully! Welcome, {new_username}!")
+                return new_username, user_data
+        elif username in user_data:
+            print(f"Welcome back, {username}!")
+            return username, user_data
+        else:
+            print("Username not found. Please try again or type 'new' to create an account.")
 
 def create_flashcards():
     """Allow the user to manually create a flashcard set."""
@@ -137,28 +172,29 @@ def edit_flashcard_set(flashcard_sets):
 
 def main_menu():
     """Main menu for the flashcard program."""
-    # Default flashcard set
-    default_flash_cards = {
-        "terms": {
-            "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
-            "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
-            "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
-            "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
-        },
-        "stats": {"correct": 0, "total": 0, "percentage": 0.0}
-    }
+    username, user_data = login()  # Log in or create an account
+    flashcard_sets = user_data.get(username, {})  # Load the user's flashcard sets
 
-    # Dictionary to store multiple flashcard sets
-    flashcard_sets = {"Python (default)": default_flash_cards}  # Renamed default set
+    # Ensure the default set exists for the user
+    if "Python (default)" not in flashcard_sets:
+        flashcard_sets["Python (default)"] = {
+            "terms": {
+                "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+                "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+                "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+                "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+            },
+            "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+        }
 
     while True:
-        print("\nMain Menu:")
+        print(f"\nMain Menu (Logged in as: {username}):")
         print("1. Create a new flashcard set")
         print("2. View available flashcard sets")
         print("3. Play with a flashcard set")
         print("4. Edit a flashcard set")
         print("5. Delete a flashcard set")
-        print("6. Exit")
+        print("6. Save and Exit")
         choice = input("Enter your choice (1/2/3/4/5/6): ").strip()
 
         if choice == "1":
@@ -205,8 +241,10 @@ def main_menu():
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
         elif choice == "6":
-            # Exit the program
-            print("Thank you for using the Flash Card Program! Goodbye!")
+            # Save progress and exit
+            user_data[username] = flashcard_sets  # Save the user's flashcard sets
+            save_user_data(user_data)
+            print("Your progress has been saved. Goodbye!")
             break
 
         else:
