@@ -7,6 +7,7 @@ import json
 import os
 import gzip
 import hashlib
+import msvcrt  # Import for custom password masking with asterisks
 
 def hash_password(password):
     """Hash a password using SHA-256."""
@@ -28,6 +29,26 @@ def save_user_data(user_data):
     with gzip.open("user_data.json.gz", "wt", encoding="utf-8") as file:
         json.dump(user_data, file, indent=4)
 
+def input_password(prompt="Enter your password: "):
+    """Custom password input function that displays asterisks."""
+    print(prompt, end="", flush=True)
+    password = ""
+    while True:
+        char = msvcrt.getch()
+        if char in {b"\r", b"\n"}:  # Enter key pressed
+            print()  # Move to the next line
+            break
+        elif char == b"\x08":  # Backspace key pressed
+            if len(password) > 0:
+                password = password[:-1]
+                print("\b \b", end="", flush=True)  # Erase the last asterisk
+        elif char == b"\x03":  # Ctrl+C pressed
+            raise KeyboardInterrupt  # Allow Ctrl+C to interrupt
+        else:
+            password += char.decode("utf-8")
+            print("*", end="", flush=True)  # Display an asterisk
+    return password
+
 def login():
     """Prompt the user to log in or create a new account with a password."""
     user_data = load_user_data()
@@ -39,7 +60,7 @@ def login():
             if new_username in user_data:
                 print("This username already exists. Please try again.")
             else:
-                password = input("Enter a password: ").strip()
+                password = input_password("Enter a password: ").strip()  # Use custom password input
                 hashed_password = hash_password(password)
                 user_data[new_username] = {
                     "password": hashed_password,  # Store the hashed password
@@ -49,7 +70,7 @@ def login():
                 print(f"Account created successfully! Welcome, {new_username}!")
                 return new_username, user_data
         elif username in user_data:
-            password = input("Enter your password: ").strip()
+            password = input_password("Enter your password: ").strip()  # Use custom password input
             stored_hashed_password = user_data[username]["password"]
             if verify_password(stored_hashed_password, password):
                 print(f"Welcome back, {username}!")
@@ -59,30 +80,9 @@ def login():
         else:
             print("Username not found. Please try again or type 'new' to create an account.")
 
-def create_flashcards():
-    """Allow the user to manually create a flashcard set."""
-    flash_cards = {
-        "terms": {},  # Store individual terms
-        "stats": {"correct": 0, "total": 0, "percentage": 0.0}  # Overall stats for the set
-    }
-    print("Let's create your flashcard set!")
-    print("Enter terms and their definitions. Type 'done' when you're finished.\n")
-
-    while True:
-        term = input("Enter a term (or type 'done' to finish): ").strip()
-        if term.lower() == "done":
-            break
-        definition = input(f"Enter the definition for '{term}': ").strip()
-        # Initialize stats for the term
-        flash_cards["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
-        print(f"Added: {term} -> {definition}\n")
-
-    print("Flashcard set created successfully!\n")
-    return flash_cards
-
 def flash_card_game(flash_cards):
-    """Main game logic with score-tracking."""
-    print("Welcome to the Flash Card Program!")
+    """Play a flashcard game with shuffled terms and compare user input with correct answers."""
+    print("Welcome to the Flash Card Game!")
     print("You will be shown a term, and you need to guess its definition.")
     print("Type 'exit' to quit the game.\n")
 
@@ -142,7 +142,6 @@ def edit_flashcard_set(flashcard_sets):
             choice = input("Enter your choice (1/2/3/4/5): ").strip()
 
             if choice == "1":
-                # Add a new term
                 term = input("Enter the new term: ").strip()
                 if term in flash_cards["terms"]:
                     print(f"The term '{term}' already exists. Use the update option to modify it.")
@@ -152,7 +151,6 @@ def edit_flashcard_set(flashcard_sets):
                     print(f"Added: {term} -> {definition}")
 
             elif choice == "2":
-                # Update an existing term
                 term = input("Enter the term you want to update: ").strip()
                 if term in flash_cards["terms"]:
                     definition = input(f"Enter the new definition for '{term}': ").strip()
@@ -162,7 +160,6 @@ def edit_flashcard_set(flashcard_sets):
                     print(f"The term '{term}' does not exist in the flashcard set.")
 
             elif choice == "3":
-                # Delete a term
                 term = input("Enter the term you want to delete: ").strip()
                 if term in flash_cards["terms"]:
                     del flash_cards["terms"][term]
@@ -171,7 +168,6 @@ def edit_flashcard_set(flashcard_sets):
                     print(f"The term '{term}' does not exist in the flashcard set.")
 
             elif choice == "4":
-                # View all terms
                 print(f"\nTerms in Flashcard Set: {set_name}")
                 for term, data in flash_cards["terms"].items():
                     correct = data["correct"]
@@ -181,7 +177,6 @@ def edit_flashcard_set(flashcard_sets):
                 print()
 
             elif choice == "5":
-                # Return to the main menu
                 print("Returning to the main menu...\n")
                 break
 
@@ -189,6 +184,73 @@ def edit_flashcard_set(flashcard_sets):
                 print("Invalid choice. Please enter 1, 2, 3, 4, or 5.\n")
     else:
         print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+def manage_account(username, user_data):
+    """Allow the user to view, edit, or delete their account."""
+    while True:
+        print("\nAccount Management:")
+        print("1. View account details")
+        print("2. Edit account details")
+        print("3. Delete account")
+        print("4. Return to the main menu")
+        choice = input("Enter your choice (1/2/3/4): ").strip()
+
+        if choice == "1":
+            # View account details
+            flashcard_sets = user_data[username]["flashcard_sets"]
+            print(f"\nAccount Details for '{username}':")
+            print(f"- Number of flashcard sets: {len(flashcard_sets)}")
+            print("- Flashcard sets:")
+            for set_name in flashcard_sets:
+                print(f"  - {set_name}")
+            print()
+
+        elif choice == "2":
+            # Edit account details
+            print("\nEdit Account Details:")
+            print("1. Change username")
+            print("2. Change password")
+            edit_choice = input("Enter your choice (1/2): ").strip()
+
+            if edit_choice == "1":
+                # Change username
+                new_username = input("Enter your new username: ").strip()
+                if new_username in user_data:
+                    print("This username is already taken. Please try again.")
+                else:
+                    user_data[new_username] = user_data.pop(username)
+                    username = new_username
+                    save_user_data(user_data)
+                    print(f"Your username has been updated to '{new_username}'.")
+
+            elif edit_choice == "2":
+                # Change password
+                new_password = input_password("Enter your new password: ").strip()
+                user_data[username]["password"] = hash_password(new_password)
+                save_user_data(user_data)
+                print("Your password has been updated successfully.")
+
+            else:
+                print("Invalid choice. Please enter 1 or 2.\n")
+
+        elif choice == "3":
+            # Delete account
+            confirm = input("Are you sure you want to delete your account? This action cannot be undone (yes/no): ").strip().lower()
+            if confirm == "yes":
+                del user_data[username]
+                save_user_data(user_data)
+                print("Your account has been deleted. Goodbye!")
+                exit()  # Exit the program after account deletion
+            else:
+                print("Account deletion canceled.")
+
+        elif choice == "4":
+            # Return to the main menu
+            print("Returning to the main menu...\n")
+            break
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, or 4.\n")
 
 def main_menu():
     """Main menu for the flashcard program."""
@@ -214,20 +276,22 @@ def main_menu():
         print("3. Play with a flashcard set")
         print("4. Edit a flashcard set")
         print("5. Delete a flashcard set")
-        print("6. Save and Exit")
-        choice = input("Enter your choice (1/2/3/4/5/6): ").strip()
+        print("6. Manage account")
+        print("7. Save and Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6/7): ").strip()
 
         if choice == "1":
-            # Create a new flashcard set
             set_name = input("Enter a name for your new flashcard set: ").strip()
             if set_name in flashcard_sets:
                 print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
             else:
-                flashcard_sets[set_name] = create_flashcards()
+                flashcard_sets[set_name] = {
+                    "terms": {},
+                    "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+                }
                 print(f"Flashcard set '{set_name}' created successfully!")
 
         elif choice == "2":
-            # View available flashcard sets
             print("\nAvailable Flashcard Sets:")
             for set_name, flash_cards in flashcard_sets.items():
                 correct = flash_cards["stats"]["correct"]
@@ -237,7 +301,6 @@ def main_menu():
             print()
 
         elif choice == "3":
-            # Play with a flashcard set
             set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
             if set_name in flashcard_sets:
                 flash_card_game(flashcard_sets[set_name])
@@ -245,11 +308,9 @@ def main_menu():
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
         elif choice == "4":
-            # Edit a flashcard set
             edit_flashcard_set(flashcard_sets)
 
         elif choice == "5":
-            # Delete a flashcard set
             set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
             if set_name in flashcard_sets:
                 if set_name == "Python (default)":
@@ -261,15 +322,16 @@ def main_menu():
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
         elif choice == "6":
-            # Save progress and exit
+            manage_account(username, user_data)  # Call the account management function
+
+        elif choice == "7":
             user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
             save_user_data(user_data)
             print("Your progress has been saved. Goodbye!")
             break
 
         else:
-            print("Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.\n")
-
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, or 7.\n")
 # Main program
 if __name__ == "__main__":
     main_menu()
