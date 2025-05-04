@@ -269,6 +269,255 @@ def main_menu():
             "stats": {"correct": 0, "total": 0, "percentage": 0.0}
         }
 
+    while True:  # Main menu loop
+        print(f"\nMain Menu (Logged in as: {username}):")
+        print("1. Create a new flashcard set")
+        print("2. View available flashcard sets")
+        print("3. Play with a flashcard set")
+        print("4. Edit a flashcard set")
+        print("5. Delete a flashcard set")
+        print("6. Manage account")
+        print("7. Save and Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6/7): ").strip()
+
+        if choice == "1":
+            set_name = input("Enter a name for your new flashcard set: ").strip()
+            if set_name in flashcard_sets:
+                print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
+            else:
+                flashcard_sets[set_name] = {
+                    "terms": {},
+                    "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+                }
+                print(f"Flashcard set '{set_name}' created successfully!")
+
+        elif choice == "2":
+            print("\nAvailable Flashcard Sets:")
+            for set_name, flash_cards in flashcard_sets.items():
+                correct = flash_cards["stats"]["correct"]
+                total = flash_cards["stats"]["total"]
+                percentage = flash_cards["stats"]["percentage"]
+                print(f"- {set_name}: {correct}/{total} correct ({percentage:.2f}%)")
+            print()
+
+        elif choice == "3":
+            set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
+            if set_name in flashcard_sets:
+                flash_card_game(flashcard_sets[set_name])
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "4":
+            edit_flashcard_set(flashcard_sets)
+
+        elif choice == "5":
+            set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
+            if set_name in flashcard_sets:
+                if set_name == "Python (default)":
+                    print("The default flashcard set cannot be deleted.")
+                else:
+                    del flashcard_sets[set_name]
+                    print(f"Flashcard set '{set_name}' deleted successfully!")
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "6":
+            manage_account(username, user_data)  # Call the account management function
+
+        elif choice == "7":
+            user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
+            save_user_data(user_data)  # Save the data to the file
+            print("Your progress has been saved. Goodbye!")  # Confirm to the user
+            break  # Exit the main menu loop
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, or 7.\n")
+    """Main menu for the flashcard program."""
+    username, user_data = login()  # Log in or create an account
+    flashcard_sets = user_data[username]["flashcard_sets"]  # Load the user's flashcard sets
+
+    # Ensure the default set exists for the user
+    if "Python (default)" not in flashcard_sets:
+        flashcard_sets["Python (default)"] = {
+            "terms": {
+                "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+                "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+                "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+                "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+            },
+            "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+        }
+
+    while True:  # Main menu loop
+        print(f"\nMain Menu (Logged in as: {username}):")
+        print("1. Create a new flashcard set")
+        print("2. View available flashcard sets")
+        print("3. Play with a flashcard set")
+        print("4. Edit a flashcard set")
+        print("5. Delete a flashcard set")
+        print("6. Manage account")
+        print("7. Save and Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6/7): ").strip()
+
+        if choice == "1":
+            set_name = input("Enter a name for your new flashcard set: ").strip()
+            if set_name in flashcard_sets:
+                print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
+            else:
+                flashcard_sets[set_name] = {
+                    "terms": {},
+                    "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+                }
+                print(f"Flashcard set '{set_name}' created successfully!")
+
+        elif choice == "2":
+            print("\nAvailable Flashcard Sets:")
+            for set_name, flash_cards in flashcard_sets.items():
+                correct = flash_cards["stats"]["correct"]
+                total = flash_cards["stats"]["total"]
+                percentage = flash_cards["stats"]["percentage"]
+                print(f"- {set_name}: {correct}/{total} correct ({percentage:.2f}%)")
+            print()
+
+        elif choice == "3":
+            set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
+            if set_name in flashcard_sets:
+                flash_card_game(flashcard_sets[set_name])
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "4":
+            edit_flashcard_set(flashcard_sets)
+
+        elif choice == "5":
+            set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
+            if set_name in flashcard_sets:
+                if set_name == "Python (default)":
+                    print("The default flashcard set cannot be deleted.")
+                else:
+                    del flashcard_sets[set_name]
+                    print(f"Flashcard set '{set_name}' deleted successfully!")
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "6":
+            manage_account(username, user_data)  # Call the account management function
+
+        elif choice == "7":
+            user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
+            save_user_data(user_data)  # Save the data to the file
+            print("Your progress has been saved. Goodbye!")  # Confirm to the user
+            break  # Exit the main menu loop
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, or 7.\n")
+    """Main menu for the flashcard program."""
+    username, user_data = login()  # Log in or create an account
+    flashcard_sets = user_data[username]["flashcard_sets"]  # Load the user's flashcard sets
+
+    # Ensure the default set exists for the user
+    if "Python (default)" not in flashcard_sets:
+        flashcard_sets["Python (default)"] = {
+            "terms": {
+                "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+                "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+                "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+                "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+            },
+            "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+        }
+
+    while True:
+        print(f"\nMain Menu (Logged in as: {username}):")
+        print("1. Create a new flashcard set")
+        print("2. View available flashcard sets")
+        print("3. Play with a flashcard set")
+        print("4. Edit a flashcard set")
+        print("5. Delete a flashcard set")
+        print("6. Manage account")
+        print("7. Save and Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6/7): ").strip()
+
+        if choice == "1":
+            set_name = input("Enter a name for your new flashcard set: ").strip()
+            if set_name in flashcard_sets:
+                print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
+            else:
+                flashcard_sets[set_name] = {
+                    "terms": {},
+                    "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+                }
+                print(f"Flashcard set '{set_name}' created successfully!")
+
+                # Ask the user if they want to add terms
+                add_terms = input("Would you like to add terms to this set now? (yes/no): ").strip().lower()
+                if add_terms == "yes":
+                    while True:
+                        term = input("Enter a term (or type 'done' to finish): ").strip()
+                        if term.lower() == "done":
+                            print(f"Finished adding terms to '{set_name}'.")
+                            break
+                        definition = input(f"Enter the definition for '{term}': ").strip()
+                        flashcard_sets[set_name]["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
+                        print(f"Added: {term} -> {definition}")
+
+        elif choice == "2":
+            print("\nAvailable Flashcard Sets:")
+            for set_name, flash_cards in flashcard_sets.items():
+                correct = flash_cards["stats"]["correct"]
+                total = flash_cards["stats"]["total"]
+                percentage = flash_cards["stats"]["percentage"]
+                print(f"- {set_name}: {correct}/{total} correct ({percentage:.2f}%)")
+            print()
+
+        elif choice == "3":
+            set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
+            if set_name in flashcard_sets:
+                flash_card_game(flashcard_sets[set_name])
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "4":
+            edit_flashcard_set(flashcard_sets)
+
+        elif choice == "5":
+            set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
+            if set_name in flashcard_sets:
+                if set_name == "Python (default)":
+                    print("The default flashcard set cannot be deleted.")
+                else:
+                    del flashcard_sets[set_name]
+                    print(f"Flashcard set '{set_name}' deleted successfully!")
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "6":
+            manage_account(username, user_data)  # Call the account management function
+
+        elif choice == "7":
+            user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
+            save_user_data(user_data)  # Save the data to the file
+            print("Your progress has been saved. Goodbye!")
+            break  # Exit the main menu loop
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, or 7.\n")
+    """Main menu for the flashcard program."""
+    username, user_data = login()  # Log in or create an account
+    flashcard_sets = user_data[username]["flashcard_sets"]  # Load the user's flashcard sets
+
+    # Ensure the default set exists for the user
+    if "Python (default)" not in flashcard_sets:
+        flashcard_sets["Python (default)"] = {
+            "terms": {
+                "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+                "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+                "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+                "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+            },
+            "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+        }
+
     while True:
         print(f"\nMain Menu (Logged in as: {username}):")
         print("1. Create a new flashcard set")
@@ -332,6 +581,82 @@ def main_menu():
 
         else:
             print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, or 7.\n")
+    """Main menu for the flashcard program."""
+    username, user_data = login()  # Log in or create an account
+    flashcard_sets = user_data[username]["flashcard_sets"]  # Load the user's flashcard sets
+
+    # Ensure the default set exists for the user
+    if "Python (default)" not in flashcard_sets:
+        flashcard_sets["Python (default)"] = {
+            "terms": {
+                "Python": {"definition": "A high-level programming language.", "correct": 0, "total": 0},
+                "Variable": {"definition": "A storage location paired with an associated symbolic name.", "correct": 0, "total": 0},
+                "Function": {"definition": "A block of reusable code that performs a specific task.", "correct": 0, "total": 0},
+                "Loop": {"definition": "A programming construct that repeats a block of code.", "correct": 0, "total": 0},
+            },
+            "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+        }
+
+    while True:
+        print(f"\nMain Menu (Logged in as: {username}):")
+        print("1. Create a new flashcard set")
+        print("2. View available flashcard sets")
+        print("3. Play with a flashcard set")
+        print("4. Edit a flashcard set")
+        print("5. Delete a flashcard set")
+        print("6. Save and Exit")
+        choice = input("Enter your choice (1/2/3/4/5/6): ").strip()
+
+        if choice == "1":
+            set_name = input("Enter a name for your new flashcard set: ").strip()
+            if set_name in flashcard_sets:
+                print(f"A flashcard set named '{set_name}' already exists. Please choose a different name.")
+            else:
+                flashcard_sets[set_name] = {
+                    "terms": {},
+                    "stats": {"correct": 0, "total": 0, "percentage": 0.0}
+                }
+                print(f"Flashcard set '{set_name}' created successfully!")
+
+        elif choice == "2":
+            print("\nAvailable Flashcard Sets:")
+            for set_name, flash_cards in flashcard_sets.items():
+                correct = flash_cards["stats"]["correct"]
+                total = flash_cards["stats"]["total"]
+                percentage = flash_cards["stats"]["percentage"]
+                print(f"- {set_name}: {correct}/{total} correct ({percentage:.2f}%)")
+            print()
+
+        elif choice == "3":
+            set_name = input("Enter the name of the flashcard set you want to play with: ").strip()
+            if set_name in flashcard_sets:
+                flash_card_game(flashcard_sets[set_name])
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "4":
+            edit_flashcard_set(flashcard_sets)
+
+        elif choice == "5":
+            set_name = input("Enter the name of the flashcard set you want to delete: ").strip()
+            if set_name in flashcard_sets:
+                if set_name == "Python (default)":
+                    print("The default flashcard set cannot be deleted.")
+                else:
+                    del flashcard_sets[set_name]
+                    print(f"Flashcard set '{set_name}' deleted successfully!")
+            else:
+                print(f"No flashcard set named '{set_name}' found. Please try again.")
+
+        elif choice == "6":
+            user_data[username]["flashcard_sets"] = flashcard_sets  # Save the user's flashcard sets
+            save_user_data(user_data)
+            print("Your progress has been saved. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.\n")
+
 # Main program
 if __name__ == "__main__":
     main_menu()
