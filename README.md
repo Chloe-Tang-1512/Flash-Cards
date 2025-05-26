@@ -2,7 +2,7 @@
 
 This is a Python-based flashcard application designed to help users learn and track their progress through interactive flashcard sets. The program includes features for creating, editing, and managing flashcard sets, as well as tracking user performance and achievements.
 
-Note to my teacher Kyle: When I edit a file, it doesn't show, so when you see "2 weeks ago" that just means I uploaded the file 2 weeks ago, but I edit them quite often, so please ignore the dates next to the file, you can view the last commit in the grey area on top of the files list.
+<small>Note to my teacher Kyle: When I edit a file, it doesn't show, so when you see "2 weeks ago" that just means I uploaded the file 2 weeks ago, but I edit them quite often, so please ignore the dates next to the file, you can view the last commit in the grey area on top of the files list.</small>
 ## Features
 
 - **User Authentication**: Secure login and account creation with password hashing.
