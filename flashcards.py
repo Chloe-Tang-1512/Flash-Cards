@@ -120,44 +120,11 @@ def flash_card_game(flash_cards):
         else:
             print(f"Incorrect. The correct definition is: {correct_answer}\n")
 
-    flash_cards["stats"]["percentage"] = (flash_cards["stats"]["correct"] / flash_cards["stats"]["total"]) * 100
-    print(f"You answered {score} out of {total_questions} questions correctly!")
-    print("You've gone through all the flash cards. Great job!")
-    """Play a flashcard game with shuffled terms and compare user input with correct answers."""
-    print("Welcome to the Flash Card Game!")
-    print("You will be shown a term, and you need to guess its definition.")
-    print("Type 'exit' to quit the game.\n")
+    if flash_cards["stats"]["total"] > 0:  # Avoid division by zero
+        flash_cards["stats"]["percentage"] = (flash_cards["stats"]["correct"] / flash_cards["stats"]["total"]) * 100
+    else:
+        flash_cards["stats"]["percentage"] = 0.0
 
-    terms = list(flash_cards["terms"].keys())
-    random.shuffle(terms)
-
-    score = 0
-    total_questions = len(terms)
-
-    for term in terms:
-        print(f"Term: {term}")
-        user_answer = input("Your definition: ").strip()
-
-        if user_answer.lower() == "exit":
-            print("Thanks for playing! Returning to the main menu...\n")
-            break
-
-        correct_answer = flash_cards["terms"][term]["definition"]
-        similarity = difflib.SequenceMatcher(None, user_answer.lower(), correct_answer.lower()).ratio()
-
-        flash_cards["terms"][term]["total"] += 1
-        flash_cards["stats"]["total"] += 1
-        if similarity > 0.7:
-            print("Correct!\n")
-            score += 1
-            flash_cards["terms"][term]["correct"] += 1
-            flash_cards["stats"]["correct"] += 1
-        elif similarity > 0.4:
-            print(f"Almost correct! Here's a hint: {correct_answer[:len(correct_answer)//2]}...\n")
-        else:
-            print(f"Incorrect. The correct definition is: {correct_answer}\n")
-
-    flash_cards["stats"]["percentage"] = (flash_cards["stats"]["correct"] / flash_cards["stats"]["total"]) * 100
     print(f"You answered {score} out of {total_questions} questions correctly!")
     print("You've gone through all the flash cards. Great job!")
 
@@ -170,7 +137,7 @@ def calculate_user_level(flashcard_sets):
         total_correct += flash_cards["stats"]["correct"]
         total_attempts += flash_cards["stats"]["total"]
 
-    if total_attempts == 0:
+    if total_attempts == 0:  # Avoid division by zero
         return "Unranked"
 
     overall_percentage = (total_correct / total_attempts) * 100
@@ -561,6 +528,9 @@ def generate_daily_challenge():
 
 def update_daily_challenge(challenge, correct_answers):
     """Update the progress of the daily challenge."""
+    if correct_answers is None:  # Ensure correct_answers is not None
+        correct_answers = 0
+
     if challenge["completed"]:
         print("Today's challenge is already completed!")
         return challenge
@@ -606,7 +576,7 @@ def calculate_leaderboard(user_data):
     for rank, entry in enumerate(leaderboard, start=1):
         print(f"{rank:<5} {entry['username']:<15} {entry['level']:<12} {entry['total_correct']:<10} {entry['total_attempts']:<10} {entry['accuracy']:<12.2f}")
     print()
-
+    
 def search_flashcard_set(flashcard_set):
     """Search for terms or definitions in a flashcard set."""
     query = input("Enter a term or definition to search for: ").strip().lower()
@@ -693,7 +663,7 @@ def quiz_mode(flash_cards):
 def fill_in_the_blank_mode(flash_cards):
     """Allow users to guess missing words in definitions."""
     print("Welcome to Fill in the Blank Mode!")
-    print("You will be shown a definition with missing words, and you need to fill in the blanks.")
+    print("You will be shown a term and a definition with missing words, and you need to fill in the blanks.")
     print("Type 'exit' to quit this mode.\n")
 
     terms = list(flash_cards["terms"].keys())
@@ -713,6 +683,7 @@ def fill_in_the_blank_mode(flash_cards):
         blank_index = random.randint(0, len(words) - 1)
         blanked_definition = words[:]
         blanked_definition[blank_index] = "____"
+        print(f"Term: {term}")
         print(f"Definition: {' '.join(blanked_definition)}")
 
         user_input = input("Fill in the blank: ").strip()
@@ -728,7 +699,7 @@ def fill_in_the_blank_mode(flash_cards):
             print(f"Incorrect. The correct word was: {correct_word}\n")
 
     print(f"Fill in the Blank Mode completed! You answered {score} out of {total_questions} questions correctly.\n")
-
+    
 def main_menu():
     """Main menu for the flashcard program."""
     username, user_data = login()
@@ -748,6 +719,7 @@ def main_menu():
             },
             "stats": {"correct": 0, "total": 0, "percentage": 0.0}
         }
+        save_user_data(user_data)  # Save the default flashcard set
 
     while True:
         user_level = calculate_user_level(flashcard_sets)
@@ -780,6 +752,7 @@ def main_menu():
                     "terms": {},
                     "stats": {"correct": 0, "total": 0, "percentage": 0.0}
                 }
+                save_user_data(user_data)  # Save after creating a new flashcard set
                 print(f"Flashcard set '{set_name}' created successfully under the category '{category}'!")
 
                 while True:
@@ -792,6 +765,7 @@ def main_menu():
                     else:
                         definition = input(f"Enter the definition for '{term}': ").strip()
                         flashcard_sets[set_name]["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
+                        save_user_data(user_data)  # Save after adding a term
                         print(f"Added: {term} -> {definition}")
 
         elif choice == "2":
@@ -840,6 +814,7 @@ def main_menu():
             set_name = input("Enter the name of the flashcard set you want to edit: ").strip()
             if set_name in flashcard_sets:
                 edit_flashcard_set(flashcard_sets[set_name])
+                save_user_data(user_data)  # Save after editing a flashcard set
             else:
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
@@ -850,6 +825,7 @@ def main_menu():
                     print("The default flashcard set cannot be deleted.")
                 else:
                     del flashcard_sets[set_name]
+                    save_user_data(user_data)  # Save after deleting a flashcard set
                     print(f"Flashcard set '{set_name}' deleted successfully!")
             else:
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
@@ -968,6 +944,7 @@ def main_menu():
                     "terms": {},
                     "stats": {"correct": 0, "total": 0, "percentage": 0.0}
                 }
+                save_user_data(user_data)  # Save after creating a new flashcard set
                 print(f"Flashcard set '{set_name}' created successfully under the category '{category}'!")
 
                 while True:
@@ -980,6 +957,7 @@ def main_menu():
                     else:
                         definition = input(f"Enter the definition for '{term}': ").strip()
                         flashcard_sets[set_name]["terms"][term] = {"definition": definition, "correct": 0, "total": 0}
+                        save_user_data(user_data)  # Save after adding a term
                         print(f"Added: {term} -> {definition}")
 
         elif choice == "2":
@@ -1028,6 +1006,7 @@ def main_menu():
             set_name = input("Enter the name of the flashcard set you want to edit: ").strip()
             if set_name in flashcard_sets:
                 edit_flashcard_set(flashcard_sets[set_name])
+                save_user_data(user_data)  # Save after editing a flashcard set
             else:
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
 
@@ -1038,6 +1017,7 @@ def main_menu():
                     print("The default flashcard set cannot be deleted.")
                 else:
                     del flashcard_sets[set_name]
+                    save_user_data(user_data)  # Save after deleting a flashcard set
                     print(f"Flashcard set '{set_name}' deleted successfully!")
             else:
                 print(f"No flashcard set named '{set_name}' found. Please try again.")
